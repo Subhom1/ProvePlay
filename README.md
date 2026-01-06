@@ -1,6 +1,7 @@
 # ProvePlay Casino
 
 ProvePlay Casino is a provably fair online gaming platform built with a modern tech stack. It features a transparent and secure gaming experience with instant verification of game results.
+
 <img src="https://raw.githubusercontent.com/Subhom1/mygitsrc/refs/heads/master/src/proveplay.png" alt="ProvePlay Casino">
 
 ## Features
