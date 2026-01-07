@@ -5,19 +5,30 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
 from typing import List
-import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
-mongo_url = os.environ['MONGO_URL']
+# MongoDB connection
+mongo_url = os.environ.get('MONGO_URL')
+db_name = os.environ.get('DB_NAME')
+
+if not mongo_url:
+    logging.error("MONGO_URL environment variable is missing!")
+    logging.error("If running locally, ensure .env file exists.")
+    logging.error("If running on Render, ensure Environment Variables are set in the dashboard.")
+    raise ValueError("MONGO_URL environment variable is required")
+
+if not db_name:
+    logging.error("DB_NAME environment variable is missing!")
+    raise ValueError("DB_NAME environment variable is required")
+
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+db = client[db_name]
 
 # Create the main app without a prefix
 app = FastAPI()
@@ -30,16 +41,7 @@ async def health_check():
 api_router = APIRouter(prefix="/api")
 
 
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-class StatusCheckCreate(BaseModel):
-    client_name: str
+from backend.models import StatusCheck, StatusCheckCreate, User, UserCreate
 
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
